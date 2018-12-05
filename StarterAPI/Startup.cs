@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StarterAPI.Jobs;
 using StarterAPI.Models;
 using StarterAPI.Repositories;
+using StarterAPI.Utils;
 
 namespace StarterAPI
 {
@@ -24,13 +28,16 @@ namespace StarterAPI
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<RandomStringProvider>();
+            services.AddSingleton<IHostedService, DataRefreshService>();
+            services.AddSingleton<HttpClient>();
             services.AddMvc();
             services.AddDbContext<TodoContext>((context) => context.UseInMemoryDatabase("TestDB"));
             services.AddScoped<IGenericRepository<Todo>, GenericRepository<Todo>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
